@@ -1,10 +1,38 @@
 import pygame
-from src.data import rom_data
+from src.data import rom_data, rw_data
+from src.core import DISPLAY_FLAG_NAMES_MAP
 
 pygame.init()
 pygame.display.set_caption(f"bleh v{rom_data.version}")
-rom_data.screen = pygame.display.set_mode(
-    (1920, 1080), pygame.SCALED | pygame.FULLSCREEN
+
+for flag_name, enabled in rw_data.flags.items():
+    if enabled:
+        rom_data.flags |= DISPLAY_FLAG_NAMES_MAP.inverse[flag_name][0]
+
+rom_data.window = pygame.display.set_mode(rw_data.resolution, rom_data.flags)
+rom_data.window_rect = rom_data.window.get_rect()
+rom_data.abs_window = pygame.Surface((1920, 1080))
+rom_data.abs_window_rect = rom_data.abs_window.get_rect()
+rom_data.screen_rect = pygame.Rect(
+    0, 0, pygame.display.Info().current_w, pygame.display.Info().current_h
 )
-rom_data.screen_rect = rom_data.screen.get_rect()
+
+if rw_data.non_int_scaling:
+    scalex = rom_data.window_rect.width / rom_data.abs_window_rect.width
+    scaley = rom_data.window_rect.height / rom_data.abs_window_rect.height
+    if rw_data.non_native_ratio:
+        rom_data.scale_factor = (scalex, scaley)
+    else:
+        min_ratio = min(scalex, scaley)
+        rom_data.scale_factor = (min_ratio, min_ratio)
+else:
+    int_scalex = rom_data.window_rect.width // rom_data.abs_window_rect.width
+    int_scaley = rom_data.window_rect.height // rom_data.abs_window_rect.height
+    if rw_data.non_native_ratio:
+        rom_data.scale_factor = (int_scalex, int_scaley)
+    else:
+        minimum_int_ratio = min(int_scalex, int_scaley)
+        rom_data.scale_factor = minimum_int_ratio
+
+
 rom_data.running = True
