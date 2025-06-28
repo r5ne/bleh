@@ -4,22 +4,18 @@ import pygame
 
 import src
 
-
 def main():
     _running = True
     clock = pygame.time.Clock()
     while _running:
-        for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    src.rom_data.running = False
-        if not src.rom_data.running:
-            print("quitting safely...")
+        src.core.events.process_events(pygame.event.get())
+        src.core.keybinds.notify()
+        if not src.data.rom_data.running:
             _running = False
-        src.rom_data.dt = clock.tick(src.rom_data.fps) / 100
-        src.rom_data.window.blit(
+        src.data.rom_data.dt = clock.tick(src.data.rom_data.fps) / 100
+        src.data.rom_data.window.blit(
             pygame.transform.scale_by(
-                src.rom_data.abs_window, src.rom_data.scale_factor
+                src.data.rom_data.abs_window, src.data.rom_data.scale_factor
             ),
             (0, 0),
         )

@@ -1,2 +1,4 @@
 import src.prepare
-from src.data import rom_data
+import src.data
+import src.core.events
+import src.core.keybinds

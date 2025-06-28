@@ -1,9 +1,13 @@
 import pygame
+
 from src.data import rom_data, rw_data
 from src.core import DISPLAY_FLAG_NAMES_MAP
+from src.core import keybinds
 
 pygame.init()
 pygame.display.set_caption(f"bleh v{rom_data.version}")
+
+# window config
 
 for flag_name, enabled in rw_data.flags.items():
     if enabled:
@@ -34,5 +38,8 @@ else:
         minimum_int_ratio = min(int_scalex, int_scaley)
         rom_data.scale_factor = minimum_int_ratio
 
+# global keybindings
+
+keybinds.register(("keydown", pygame.K_END), action=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)))
 
 rom_data.running = True
