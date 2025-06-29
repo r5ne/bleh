@@ -23,24 +23,24 @@ def initialise_state(state_name):
     )
     raise KeyError(msg)
 
-def append(state_name, *, initial_state):
+def append_state(state_name, *, initial_state=None):
     if not initial_state:
         current_state().cleanup()
     state_stack.append(initialise_state(state_name))
     current_state().startup()
 
-def pop():
+def pop_state():
     current_state().cleanup()
     state_stack.pop()
     current_state().startup()
 
-def switch(state_name):
+def switch_state(state_name):
     current_state().cleanup()
     state_stack.pop()
     state_stack.append(initialise_state(state_name))
     current_state().startup()
 
-def back_to(state_name):
+def back_to_state(state_name):
     if not state_exists(state_name):
         msg = (
             f"Cannot go back to state {state_name!r}. State does not exist in"
