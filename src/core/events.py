@@ -16,7 +16,7 @@ def is_key_down(key):
 
 
 def is_key_up(key):
-    return key in _keydown_keys
+    return key in _keyup_keys
 
 
 def is_key_held(key):
