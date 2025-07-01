@@ -41,7 +41,10 @@ else:
 
 # global keybindings
 
-keybinds.register(("keydown", pygame.K_END), action=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)))
+keybinds.register(
+    ("keydown", pygame.K_END),
+    action=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)),
+)
 keybinds.register(("keydown", pygame.K_ESCAPE), action=src.states.manager.back)
 
 src.states.manager.state_dict = {"title": src.states.Title, "game": src.states.Game}

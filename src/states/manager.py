@@ -1,17 +1,17 @@
 state_dict = {}
 state_stack = []
 
+
 def current_state():
     if state_stack:
         return state_stack[-1]
-    msg = (
-        f"Attempted to access current state in empty state stack "
-        f"{state_stack}."
-    )
+    msg = f"Attempted to access current state in empty state stack " f"{state_stack}."
     raise IndexError(msg)
+
 
 def state_exists(state_name):
     return state_name in state_dict
+
 
 def initialise_state(state_name):
     if state_exists(state_name):
@@ -23,22 +23,26 @@ def initialise_state(state_name):
     )
     raise KeyError(msg)
 
+
 def append_state(state_name, *, initial_state=None):
     if not initial_state:
         current_state().cleanup()
     state_stack.append(initialise_state(state_name))
     current_state().startup()
 
+
 def pop_state():
     current_state().cleanup()
     state_stack.pop()
     current_state().startup()
+
 
 def switch_state(state_name):
     current_state().cleanup()
     state_stack.pop()
     state_stack.append(initialise_state(state_name))
     current_state().startup()
+
 
 def back_to_state(state_name):
     if not state_exists(state_name):
@@ -51,6 +55,7 @@ def back_to_state(state_name):
     while current_state() != state_dict[state_name]:
         state_stack.pop()
     current_state().startup()
+
 
 def back():
     if current_state():

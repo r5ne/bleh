@@ -3,6 +3,7 @@ import pygame
 from src.states.state import State
 from src.states.manager import append_state
 
+
 class Title(State):
     def __init__(self):
         super().__init__()

@@ -53,10 +53,7 @@ def notify():
     for inputs, actions in sorted_bindings_cache:
         for input_type, value in inputs:
             check_func = input_checks.get(input_type)
-            if (
-                (input_type, value) not in used_inputs
-                and check_func(value)
-            ):
+            if (input_type, value) not in used_inputs and check_func(value):
                 for action in actions:
                     action()
                 used_inputs.update(inputs)
