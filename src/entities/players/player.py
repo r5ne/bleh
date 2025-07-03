@@ -19,6 +19,7 @@ class Player(RespawnableEntity):
         self,
         bullet_group,
         bullet_pool,
+        bullet_pattern,
         surface,
         hitbox=None,
         spawnpoint=None,
@@ -32,7 +33,7 @@ class Player(RespawnableEntity):
             stats = PlayerStats()
         self.health = stats.health
         self.speed = stats.speed
-        self.shoot_cooldown = stats.shoot_cooldown
+        self.bullet_pattern = bullet_pattern(self.bullet_pool, self.bullet_group, stats.shoot_cooldown)
         self._press_counter = 0
         self._key_priority = {
             pygame.K_UP: 0,
@@ -40,9 +41,6 @@ class Player(RespawnableEntity):
             pygame.K_LEFT: 0,
             pygame.K_RIGHT: 0,
         }
-        self._current_time = 0
-        self._last_shot_time = 0
-
 
     def update(self):
         for key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
@@ -73,12 +71,6 @@ class Player(RespawnableEntity):
         self.hitbox.x += round(dx * rom_data.dt)
         self.hitbox.y += round(dy * rom_data.dt)
         self.hitbox.clamp_ip(rom_data.abs_window_rect)
-        self._current_time = pygame.time.get_ticks()
         if events.is_key_held(pygame.K_z):
-            self.shoot()
-
-    def shoot(self):
-        if self._current_time - self._last_shot_time >= self.shoot_cooldown:
-            bullet = self.bullet_pool.aquire(self.sprite_rect.midtop, 150)
-            self.bullet_group.add(bullet)
-            self._last_shot_time = self._current_time
+            self.bullet_pattern.start(self.sprite_rect.midtop)
+        self.bullet_pattern.update()
