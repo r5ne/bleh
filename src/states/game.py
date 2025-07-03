@@ -2,7 +2,7 @@ import pygame
 
 from src.data import rom_data
 from src.states.state import State
-from src.entities.players.player import Player
+from src.entities import Player, EntityGroup, BulletPool, Bullet
 
 
 class Game(State):
@@ -11,8 +11,12 @@ class Game(State):
         self.background = pygame.Surface((1920, 1080))
         temp = pygame.Surface((10, 10))
         temp.fill(pygame.Color("white"))
+        self.player_bullets = EntityGroup()
+        sprite = pygame.Surface((2, 2))
+        sprite.fill(pygame.Color("white"))
+        self.player_bullet_pool = BulletPool(Bullet, 200, sprite)
         self.player = Player(
-            self,
+            self.player_bullets, self.player_bullet_pool,
             temp,
             spawnpoint=[
                 rom_data.abs_window_rect.centerx - 5,
@@ -22,7 +26,14 @@ class Game(State):
 
     def update(self):
         self.player.update()
+        self.player_bullets.update()
+
+        for bullet in list(self.player_bullets):
+            if not bullet.active:
+                self.player_bullets.remove(bullet)
+                self.player_bullet_pool.release(bullet)
 
     def render(self):
         super().render()
         self.player.blit()
+        self.player_bullets.blit()
