@@ -1,4 +1,4 @@
-from typing import override
+from typing import override, final
 
 import pygame
 
@@ -6,34 +6,69 @@ from src.data import rom_data
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, image, hitbox=None, spawnpoint=None, image_alignment="center"):
+    def __init__(self, sprite, hitbox=None, spawnpoint=None, sprite_hitbox_alignment="center"):
         super().__init__()
-        self.image = image
-        self.image_rect = self.image.get_rect()
+        self.sprite = sprite
+        self.sprite_rect = self.sprite.get_rect()
         if hitbox is not None:
             self.hitbox = hitbox
         else:
-            self.hitbox = self.image.get_rect()
-        if spawnpoint:
-            self.spawnpoint = [0, 0]
-        else:
-            self.spawnpoint = spawnpoint
-        self.image_alignment = image_alignment
-        self.move_to_spawn()
+            self.hitbox = self.sprite.get_rect()
+        self.sprite_hitbox_alignment = sprite_hitbox_alignment
+        if spawnpoint is not None:
+            self.hitbox.topleft = spawnpoint
+
+        self.image = self.sprite
+        self.rect = self.hitbox
 
     @override
     def update(self): ...
 
     def blit(self):
         setattr(
-            self.image_rect,
-            self.image_alignment,
-            getattr(self.hitbox, self.image_alignment),
+            self.sprite_rect,
+            self.sprite_hitbox_alignment,
+            getattr(self.hitbox, self.sprite_hitbox_alignment),
         )
-        rom_data.abs_window.blit(self.image, self.image_rect)
+        rom_data.abs_window.blit(self.sprite, self.sprite_rect)
 
-    def move_to_spawn(self):
-        setattr(self.hitbox, "topleft", self.spawnpoint)
+
+class RespawnableEntity(Entity):
+    def __init__(self, sprite, hitbox=None, spawnpoint=None, sprite_hitbox_alignment="center"):
+        self.spawnpoint = spawnpoint if spawnpoint is not None else [0, 0]
+        super().__init__(sprite, hitbox, self.spawnpoint, sprite_hitbox_alignment)
+
+    def respawn(self):
+        self.hitbox.topleft = self.spawnpoint
+
+
+class PoolableEntity(Entity):
+    def __init__(self, sprite, hitbox=None, sprite_hitbox_alignment="center"):
+        super().__init__(sprite, hitbox, sprite_hitbox_alignment=sprite_hitbox_alignment)
+        self.spawnpoint = None
+        self.active = True
+
+    @final
+    def blit(self):
+        if self.active:
+            self._blit()
+
+    @final
+    def update(self):
+        if self.active:
+            self._update()
+
+    def _blit(self):
+        super().blit()
+
+    def _update(self): ...
+
+    def deactivate(self):
+        self.active = False
+
+    def activate(self, spawnpoint, *args, **kwargs):
+        self.hitbox.topleft = spawnpoint
+        self.active = True
 
 
 class EntityGroup(pygame.sprite.Group):
