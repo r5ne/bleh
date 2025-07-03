@@ -8,7 +8,7 @@ class Bullet(PoolableEntity):
 
     def _update(self):
         self.hitbox.move_ip(0, round(-self.speed * rom_data.dt))
-        if not rom_data.abs_window_rect.contains(self.sprite_rect):
+        if not rom_data.abs_window_rect.contains(self.hitbox):
             self.deactivate()
 
     def activate(self, spawnpoint, speed):
