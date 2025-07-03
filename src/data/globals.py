@@ -12,7 +12,7 @@ class RWData(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     flags: dict[str, bool] = {"fullscreen": True, "noframe": True}
-    resolution: tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = None  # will be defined after prepare.py is ran
     non_int_scaling: bool = True
     non_native_ratio: bool = False
 
@@ -46,14 +46,15 @@ class ROMData:
     dt: float = 1.0
     flags: int = pygame.SCALED
     # defined in after prepare.py is called
-    abs_window: pygame.Surface = ...
-    abs_window_rect: pygame.Rect = ...
-    window: pygame.Surface = ...
-    window_rect: pygame.Rect = ...
-    screen_rect: pygame.Rect = ...
-    scale_factor: tuple[float, float] = ...
+    abs_window: pygame.Surface = None
+    abs_window_rect: pygame.Rect = None
+    window: pygame.Surface = None
+    window_rect: pygame.Rect = None
+    screen_rect: pygame.Rect = None
+    scale_factor: tuple[float, float] = None
     config_dir = Path("config.json")
+    default_config: bool = None
 
 
 rom_data = ROMData()
-rw_data, _ = RWData.load(rom_data.config_dir)
+rw_data, rom_data.default_config = RWData.load(rom_data.config_dir)

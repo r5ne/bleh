@@ -1,3 +1,5 @@
+import warnings
+
 import pygame
 
 from src.data import rom_data, rw_data
@@ -14,30 +16,42 @@ for flag_name, enabled in rw_data.flags.items():
     if enabled:
         rom_data.flags |= DISPLAY_FLAG_NAMES_MAP.inverse[flag_name][0]
 
+rom_data.screen_rect = pygame.Rect(
+    0, 0, pygame.display.Info().current_w, pygame.display.Info().current_h
+)
+if rom_data.default_config or not rw_data.resolution:
+    rw_data.resolution = rom_data.screen_rect.size
+
 rom_data.window = pygame.display.set_mode(rw_data.resolution, rom_data.flags)
 rom_data.window_rect = rom_data.window.get_rect()
 rom_data.abs_window = pygame.Surface((1920, 1080))
 rom_data.abs_window_rect = rom_data.abs_window.get_rect()
-rom_data.screen_rect = pygame.Rect(
-    0, 0, pygame.display.Info().current_w, pygame.display.Info().current_h
-)
 
-if rw_data.non_int_scaling:
-    scalex = rom_data.window_rect.width / rom_data.abs_window_rect.width
-    scaley = rom_data.window_rect.height / rom_data.abs_window_rect.height
-    if rw_data.non_native_ratio:
-        rom_data.scale_factor = (scalex, scaley)
+
+while rom_data.scale_factor is None or not all(rom_data.scale_factor):
+    if rw_data.non_int_scaling:
+        scalex = round(rom_data.window_rect.width / rom_data.abs_window_rect.width, 4)
+        scaley = round(rom_data.window_rect.height / rom_data.abs_window_rect.height, 4)
+        if rw_data.non_native_ratio:
+            rom_data.scale_factor = (scalex, scaley)
+        else:
+            min_ratio = min(scalex, scaley)
+            rom_data.scale_factor = (min_ratio, min_ratio)
     else:
-        min_ratio = min(scalex, scaley)
-        rom_data.scale_factor = (min_ratio, min_ratio)
-else:
-    int_scalex = rom_data.window_rect.width // rom_data.abs_window_rect.width
-    int_scaley = rom_data.window_rect.height // rom_data.abs_window_rect.height
-    if rw_data.non_native_ratio:
-        rom_data.scale_factor = (int_scalex, int_scaley)
-    else:
-        minimum_int_ratio = min(int_scalex, int_scaley)
-        rom_data.scale_factor = minimum_int_ratio
+        int_scalex = rom_data.window_rect.width // rom_data.abs_window_rect.width
+        int_scaley = rom_data.window_rect.height // rom_data.abs_window_rect.height
+        if rw_data.non_native_ratio:
+            rom_data.scale_factor = (int_scalex, int_scaley)
+        else:
+            minimum_int_ratio = min(int_scalex, int_scaley)
+            if minimum_int_ratio == 0:
+                msg = ("Attempted to use only integer scaling and a native "
+                       "ratio, but screen size is smaller than native ratio. "
+                       "Forcing non integer scaling to be allowed, and "
+                       "recalculating scale factor.")
+                warnings.warn(msg)
+                rw_data.non_int_scaling = True
+            rom_data.scale_factor = (minimum_int_ratio, minimum_int_ratio)
 
 # global keybindings
 
