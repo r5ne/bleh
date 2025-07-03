@@ -76,4 +76,5 @@ class EntityGroup(pygame.sprite.Group):
         super().__init__()
 
     def blit(self):
-        super().draw(rom_data.abs_window)
+        for entity in self.sprites():
+            entity.blit()
