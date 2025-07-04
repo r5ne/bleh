@@ -1,22 +1,24 @@
+import pygame
+
 from src.data import rom_data
 from src.states.manager import pop_state
 
 
 class State:
     def __init__(self):
-        self.background = None
+        self.background = pygame.Surface((1920, 1080))
 
-    def startup(self):
-        if self.background is None:
-            msg = "Failed to define self.background at __init__."
-            raise ValueError(msg)
+    def startup(self) -> None: ...
 
-    def cleanup(self): ...
+    def cleanup(self) -> None: ...
 
-    def render(self):
+    def render(self) -> None: ...
+
+    def update(self) -> None:
+        self.draw_background()
+
+    def draw_background(self) -> None:
         rom_data.abs_window.blit(self.background, (0, 0))
 
-    def update(self): ...
-
-    def back(self):
+    def back(self) -> None:
         pop_state()

@@ -5,7 +5,7 @@ import pygame
 import src
 
 
-def main():
+def main() -> None:
     _running = True
     clock = pygame.time.Clock()
     while _running:
@@ -24,6 +24,7 @@ def main():
             (0, 0),
         )
         pygame.display.flip()
+
 
 if __name__ == "__main__":
     main()

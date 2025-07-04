@@ -1,6 +1,8 @@
 import warnings
 from collections import defaultdict
+from typing import Callable, Any
 
+from src.core.types import EventTypes
 from src.core.events import (
     is_key_down,
     is_key_up,
@@ -24,12 +26,12 @@ input_checks = {
 sorted_bindings_cache = []
 
 
-def register(*inputs, action):
+def register(*inputs: tuple[EventTypes, int], action: Callable[[], Any]) -> None:
     observers[inputs].append(action)
     sorted_bindings_cache.clear()
 
 
-def deregister(*inputs, action):
+def deregister(*inputs: tuple[EventTypes, int], action: Callable[[], Any]) -> None:
     if action is not None and action in observers[inputs]:
         observers[inputs].remove(action)
         if not observers[inputs]:
@@ -43,7 +45,7 @@ def deregister(*inputs, action):
     sorted_bindings_cache.clear()
 
 
-def notify():
+def notify() -> None:
     global sorted_bindings_cache
     if not sorted_bindings_cache:
         sorted_bindings_cache = sorted(
@@ -53,11 +55,15 @@ def notify():
     for inputs, actions in sorted_bindings_cache:
         for input_type, value in inputs:
             check_func = input_checks.get(input_type)
-            if (input_type, value) not in used_inputs and check_func(value):
+            if (
+                (input_type, value) not in used_inputs
+                and check_func is not None
+                and check_func(value)
+            ):
                 for action in actions:
                     action()
                 used_inputs.update(inputs)
 
 
-def is_registered(*events, handler):
+def is_registered(*events: int, handler: Callable[[], Any]) -> bool:
     return events in observers and handler in observers[events]

@@ -1,12 +1,23 @@
-from typing import override, final
+from __future__ import annotations
+from typing import override, final, TYPE_CHECKING
+from abc import ABC, abstractmethod
 
 import pygame
 
 from src.data import rom_data
 
+if TYPE_CHECKING:
+    from src.core import RectAlignments
 
-class Entity(pygame.sprite.Sprite):
-    def __init__(self, sprite, hitbox=None, spawnpoint=None, sprite_hitbox_alignment="center"):
+
+class Entity(pygame.sprite.Sprite, ABC):
+    def __init__(
+        self,
+        sprite: pygame.Surface,
+        hitbox: pygame.Rect | None = None,
+        spawnpoint: tuple[int, int] | None = None,
+        sprite_hitbox_alignment: RectAlignments | str = "center",
+    ):
         super().__init__()
         self.sprite = sprite
         self.sprite_rect = self.sprite.get_rect()
@@ -18,55 +29,76 @@ class Entity(pygame.sprite.Sprite):
         if spawnpoint is not None:
             self.hitbox.topleft = spawnpoint
 
-        self.image = self.sprite
-        self.rect = self.hitbox
-
+    @abstractmethod
     @override
-    def update(self): ...
+    def update(self) -> None: ...
 
-    def blit(self):
+    @final
+    def update_sprite_rect(self) -> None:
         setattr(
             self.sprite_rect,
             self.sprite_hitbox_alignment,
             getattr(self.hitbox, self.sprite_hitbox_alignment),
         )
+
+    @abstractmethod
+    def draw(self) -> None: ...
+
+    @final
+    def draw_sprite(self) -> None:
         rom_data.abs_window.blit(self.sprite, self.sprite_rect)
 
 
-class RespawnableEntity(Entity):
-    def __init__(self, sprite, hitbox=None, spawnpoint=None, sprite_hitbox_alignment="center"):
-        self.spawnpoint = spawnpoint if spawnpoint is not None else [0, 0]
+class RespawnableEntity(Entity, ABC):
+    def __init__(
+        self,
+        sprite: pygame.Surface,
+        hitbox: pygame.Rect | None = None,
+        spawnpoint: tuple[int, int] | None = None,
+        sprite_hitbox_alignment: RectAlignments | str = "center",
+    ) -> None:
+        self.spawnpoint = spawnpoint if spawnpoint is not None else (0, 0)
         super().__init__(sprite, hitbox, self.spawnpoint, sprite_hitbox_alignment)
 
-    def respawn(self):
+    def respawn(self) -> None:
         self.hitbox.topleft = self.spawnpoint
 
 
-class PoolableEntity(Entity):
-    def __init__(self, sprite, hitbox=None, sprite_hitbox_alignment="center"):
-        super().__init__(sprite, hitbox, sprite_hitbox_alignment=sprite_hitbox_alignment)
-        self.spawnpoint = None
+class PoolableEntity(Entity, ABC):
+    def __init__(
+        self,
+        sprite: pygame.Surface,
+        hitbox: pygame.Rect | None = None,
+        sprite_hitbox_alignment: RectAlignments | str = "center",
+    ):
+        super().__init__(
+            sprite, hitbox, sprite_hitbox_alignment=sprite_hitbox_alignment
+        )
+        self.spawnpoint: tuple[int, int] | None = None
         self.active = True
 
     @final
-    def blit(self):
+    @override
+    def draw(self) -> None:
         if self.active:
-            self._blit()
+            self._draw()
 
     @final
-    def update(self):
+    @override
+    def update(self) -> None:
         if self.active:
             self._update()
 
-    def _blit(self):
-        super().blit()
+    @abstractmethod
+    def _draw(self) -> None: ...
 
-    def _update(self): ...
+    @abstractmethod
+    def _update(self) -> None: ...
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         self.active = False
 
-    def activate(self, spawnpoint, *args, **kwargs):
+    def activate(self, spawnpoint: tuple[int, int], *args, **kwargs) -> None:
         self.hitbox.topleft = spawnpoint
         self.active = True
 
@@ -75,6 +107,6 @@ class EntityGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
 
-    def blit(self):
+    def draw_sprites(self) -> None:
         for entity in self.sprites():
-            entity.blit()
+            entity.draw()

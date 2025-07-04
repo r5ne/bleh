@@ -11,31 +11,31 @@ _held_buttons = {}
 mouse_pos = (0, 0)
 
 
-def is_key_down(key):
+def is_key_down(key: int) -> bool:
     return key in _keydown_keys
 
 
-def is_key_up(key):
+def is_key_up(key: int) -> bool:
     return key in _keyup_keys
 
 
-def is_key_held(key):
+def is_key_held(key: int) -> bool:
     return key in _held_keys
 
 
-def is_mouse_down(button):
+def is_mouse_down(button: int) -> bool:
     return button in _mousedown_buttons
 
 
-def is_mouse_up(button):
+def is_mouse_up(button: int) -> bool:
     return button in _mouseup_buttons
 
 
-def is_mouse_held(button):
+def is_mouse_held(button: int) -> bool:
     return button in _held_buttons
 
 
-def process_events(events):
+def process_events(events: list[pygame.event.Event]) -> None:
     global mouse_pos
 
     _keydown_keys.clear()
@@ -60,7 +60,7 @@ def process_events(events):
             case pygame.QUIT:
                 data.rom_data.running = False
 
-    _mouse_pos = tuple(
+    mouse_pos = tuple(
         coord / data.rom_data.scale_factor[i]
         for i, coord in enumerate(pygame.mouse.get_pos())
     )

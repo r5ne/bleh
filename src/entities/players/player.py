@@ -1,10 +1,17 @@
+from __future__ import annotations
 from dataclasses import dataclass
+from typing import override, TYPE_CHECKING
 
 import pygame
 
 from src.core import events
 from src.data import rom_data
-from src.entities.entity import RespawnableEntity
+from src.entities.entity import EntityGroup, RespawnableEntity
+
+if TYPE_CHECKING:
+    from src.entities import BulletPool
+    from src.entities.bullets.patterns.bulletpattern import BulletPattern
+    from src.core.types import RectAlignments
 
 
 @dataclass
@@ -17,14 +24,14 @@ class PlayerStats:
 class Player(RespawnableEntity):
     def __init__(
         self,
-        bullet_group,
-        bullet_pool,
-        bullet_pattern,
-        surface,
-        hitbox=None,
-        spawnpoint=None,
-        sprite_alignment="center",
-        stats=None,
+        bullet_group: EntityGroup,
+        bullet_pool: BulletPool,
+        bullet_pattern: type[BulletPattern],
+        surface: pygame.Surface,
+        hitbox: pygame.Rect | None = None,
+        spawnpoint: tuple[int, int] | None = None,
+        sprite_alignment: RectAlignments | str = "center",
+        stats: PlayerStats | None = None,
     ):
         super().__init__(surface, hitbox, spawnpoint, sprite_alignment)
         self.bullet_group = bullet_group
@@ -33,7 +40,9 @@ class Player(RespawnableEntity):
             stats = PlayerStats()
         self.health = stats.health
         self.speed = stats.speed
-        self.bullet_pattern = bullet_pattern(self.bullet_pool, self.bullet_group, stats.shoot_cooldown)
+        self.bullet_pattern = bullet_pattern(
+            self.bullet_pool, self.bullet_group, stats.shoot_cooldown
+        )
         self._press_counter = 0
         self._key_priority = {
             pygame.K_UP: 0,
@@ -42,7 +51,8 @@ class Player(RespawnableEntity):
             pygame.K_RIGHT: 0,
         }
 
-    def update(self):
+    @override
+    def update(self) -> None:
         for key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
             if events.is_key_down(key):
                 self._press_counter += 1
@@ -71,6 +81,12 @@ class Player(RespawnableEntity):
         self.hitbox.x += round(dx * rom_data.dt)
         self.hitbox.y += round(dy * rom_data.dt)
         self.hitbox.clamp_ip(rom_data.abs_window_rect)
+
+        self.update_sprite_rect()
         if events.is_key_held(pygame.K_z):
             self.bullet_pattern.start(self.sprite_rect.midtop)
         self.bullet_pattern.update()
+
+    @override
+    def draw(self) -> None:
+        self.draw_sprite()

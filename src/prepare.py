@@ -45,11 +45,13 @@ while rom_data.scale_factor is None or not all(rom_data.scale_factor):
         else:
             minimum_int_ratio = min(int_scalex, int_scaley)
             if minimum_int_ratio == 0:
-                msg = ("Attempted to use only integer scaling and a native "
-                       "ratio, but screen size is smaller than native ratio. "
-                       "Forcing non integer scaling to be allowed, and "
-                       "recalculating scale factor.")
-                warnings.warn(msg)
+                warnings.warn(
+                    "Attempted to use only integer scaling and a native "
+                    "ratio, but screen size is smaller than native ratio. "
+                    "Forcing non integer scaling to be allowed, and "
+                    "recalculating scale factor.",
+                    stacklevel=2,
+                )
                 rw_data.non_int_scaling = True
             rom_data.scale_factor = (minimum_int_ratio, minimum_int_ratio)
 

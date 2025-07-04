@@ -1,1 +1,1 @@
-from src.entities.bullets.patterns.bulletpattern import SingleBulletPattern
+from src.entities.bullets.patterns.bulletpattern import LineBulletPattern
