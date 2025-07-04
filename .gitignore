@@ -6,3 +6,6 @@
 
 # game config files
 config.json
+
+# pyproject
+pyproject.toml
