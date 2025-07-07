@@ -5,12 +5,13 @@ from typing import override, TYPE_CHECKING
 import pygame
 
 from src.core import events
-from src.data import rom_data
-from src.entities.entity import EntityGroup, RespawnableEntity
+from src.data.globals import rom_data
+from src.entities.entity import RespawnableEntity
 
 if TYPE_CHECKING:
-    from src.entities import BulletPool
+    from src.entities.entity import EntityGroup
     from src.entities.bullets.patterns.bulletpattern import BulletPattern
+    from src.entities.bullets.bulletpool import BulletPool
     from src.core.types import RectAlignments
 
 
@@ -82,11 +83,11 @@ class Player(RespawnableEntity):
         self.hitbox.y += round(dy * rom_data.dt)
         self.hitbox.clamp_ip(rom_data.abs_window_rect)
 
-        self.update_sprite_rect()
+        self._update_sprite_rect()
         if events.is_key_held(pygame.K_z):
-            self.bullet_pattern.start(self.sprite_rect.midtop)
+            self.bullet_pattern.start(self.sprite_rect.midtop, speed=150, angle=1)
         self.bullet_pattern.update()
 
     @override
     def draw(self) -> None:
-        self.draw_sprite()
+        self._draw_sprite()

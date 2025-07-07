@@ -4,7 +4,7 @@ from abc import ABC
 from typing import override, Literal, TYPE_CHECKING
 
 
-from src.data import rom_data
+from src.data.globals import rom_data
 from src.entities.entity import PoolableEntity
 
 if TYPE_CHECKING:
@@ -23,15 +23,11 @@ class Bullet(PoolableEntity, ABC):
 
     @override
     def _draw(self) -> None:
-        self.draw_sprite()
+        self._draw_sprite()
 
     @override
     def _update(self) -> None:
-        self.update_sprite_rect()
-
-    @override
-    def activate(self, *args, **kwargs) -> None:
-        super().activate(args[0])
+        self._update_sprite_rect()
 
 
 class StraightBullet(Bullet):
@@ -48,18 +44,21 @@ class StraightBullet(Bullet):
     @override
     def _update(self) -> None:
         self.hitbox.move_ip(round(self.dx * rom_data.dt), round(self.dy * rom_data.dt))
-        self.update_sprite_rect()
+        self._update_sprite_rect()
         if not rom_data.abs_window_rect.contains(self.sprite_rect):
-            self.deactivate()
+            self.pool_despawn()
 
     @override
-    def activate(
+    def pool_respawn(
         self,
         spawnpoint: tuple[int, int],
+        spawnpoint_sprite_alignment: RectAlignments | str = "topleft",
+        *,
         speed: int,
         direction: Literal[1, 2, 3, 4] = 1,
     ) -> None:
-        super().activate(spawnpoint)
+        self.active = True
+        self._reset_hitbox(spawnpoint, spawnpoint_sprite_alignment)
         match direction:
             case 1:
                 self.dy = -speed
@@ -77,24 +76,30 @@ class LinearBullet(Bullet):
         sprite: pygame.Surface,
         hitbox: pygame.Rect | None = None,
         sprite_hitbox_alignment: RectAlignments | str = "center",
-        direction: float = 0,
     ):
         super().__init__(sprite, hitbox, sprite_hitbox_alignment)
-        self.angle = math.radians(direction)
+        self.angle = 0
         self.dx = 0
         self.dy = 0
 
     @override
     def _update(self) -> None:
         self.hitbox.move_ip(round(self.dx * rom_data.dt), round(self.dy * rom_data.dt))
-        self.update_sprite_rect()
+        self._update_sprite_rect()
         if not rom_data.abs_window_rect.contains(self.sprite_rect):
-            self.deactivate()
+            self.pool_despawn()
 
     @override
-    def activate(
-        self, spawnpoint: tuple[int, int], speed: int, angle: float = 0
+    def pool_respawn(
+        self,
+        spawnpoint: tuple[int, int],
+        spawnpoint_sprite_alignment: RectAlignments | str = "topleft",
+        *,
+        speed: int,
+        angle: float,
     ) -> None:
-        super().activate(spawnpoint)
+        self.active = True
+        self._reset_hitbox(spawnpoint, spawnpoint_sprite_alignment)
+        self.angle = math.radians(angle)
         self.dx = round(speed * math.sin(self.angle), 4)
         self.dy = round(-speed * math.cos(self.angle), 4)

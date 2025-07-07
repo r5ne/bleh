@@ -1,6 +1,10 @@
+from __future__ import annotations
 from collections import deque
 
-from src.entities.bullets.bullet import Bullet
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.bullets.bullet import Bullet
 
 
 class BulletPool:
@@ -21,14 +25,14 @@ class BulletPool:
     def aquire(self, *args, **kwargs) -> Bullet:
         if not self.free:
             oldest_bullet = self.in_use.popleft()
-            oldest_bullet.active = False
+            oldest_bullet.pool_despawn()
             self.free.append(oldest_bullet)
         bullet = self.free.pop()
-        bullet.activate(*args, **kwargs)
+        bullet.pool_respawn(*args, **kwargs)
         self.in_use.append(bullet)
         return bullet
 
     def release(self, bullet: Bullet) -> None:
-        bullet.active = False
+        bullet.pool_despawn()
         self.in_use.remove(bullet)
         self.free.append(bullet)

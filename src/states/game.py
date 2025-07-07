@@ -2,9 +2,13 @@ from typing import override
 
 import pygame
 
-from src.data import rom_data
+from src.data.globals import rom_data
 from src.states.state import State
-from src.entities import Player, EntityGroup, BulletPool, Bullet, LineBulletPattern
+from src.entities.players import player
+from src.entities import entity
+from src.entities.bullets import bullet
+from src.entities.bullets import bulletpool
+from src.entities.bullets.patterns import bulletpattern
 
 
 class Game(State):
@@ -12,14 +16,16 @@ class Game(State):
         super().__init__()
         temp = pygame.Surface((10, 10))
         temp.fill(pygame.Color("white"))
-        self.player_bullets = EntityGroup()
+        self.player_bullets = entity.EntityGroup()
         sprite = pygame.Surface((2, 2))
         sprite.fill(pygame.Color("white"))
-        self.player_bullet_pool = BulletPool(Bullet, 200, sprite)
-        self.player = Player(
+        self.player_bullet_pool = bulletpool.BulletPool(
+            bullet.LinearBullet, 200, sprite
+        )
+        self.player = player.Player(
             self.player_bullets,
             self.player_bullet_pool,
-            LineBulletPattern,
+            bulletpattern.LineBulletPattern,
             temp,
             spawnpoint=(
                 rom_data.abs_window_rect.centerx - 5,
