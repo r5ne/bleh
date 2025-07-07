@@ -1,4 +1,4 @@
-from src import data
+from src.data.globals import rom_data
 
 import pygame
 
@@ -58,9 +58,9 @@ def process_events(events: list[pygame.event.Event]) -> None:
                 _mouseup_buttons[event.button] = True
                 del _held_buttons[event.button]
             case pygame.QUIT:
-                data.rom_data.running = False
+                rom_data.running = False
 
     mouse_pos = tuple(
-        coord / data.rom_data.scale_factor[i]
+        coord / rom_data.scale_factor[i]
         for i, coord in enumerate(pygame.mouse.get_pos())
     )

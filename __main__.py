@@ -2,24 +2,26 @@ import sys
 
 import pygame
 
-import src
-
+from src.core import events, keybinds
+from src.data.globals import rom_data, rw_data
+from src.states import manager
+from src import prepare
 
 def main() -> None:
     _running = True
     clock = pygame.time.Clock()
     while _running:
-        src.core.events.process_events(pygame.event.get())
-        src.core.keybinds.notify()
-        if not src.data.rom_data.running:
-            src.data.rw_data.save(src.data.rom_data.config_dir)
+        events.process_events(pygame.event.get())
+        keybinds.notify()
+        if not rom_data.running:
+            rw_data.save(rom_data.config_dir)
             _running = False
-        src.states.manager.current_state().update()
-        src.states.manager.current_state().render()
-        src.data.rom_data.dt = clock.tick(src.data.rom_data.fps) / 100
-        src.data.rom_data.window.blit(
+        manager.current_state().update()
+        manager.current_state().render()
+        rom_data.dt = clock.tick(rom_data.fps) / 100
+        rom_data.window.blit(
             pygame.transform.scale_by(
-                src.data.rom_data.abs_window, src.data.rom_data.scale_factor
+                rom_data.abs_window, rom_data.scale_factor
             ),
             (0, 0),
         )

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import pygame
 
-from src.data import rom_data
-from src.states.manager import pop_state
+from src.data.globals import rom_data
+from src.states import manager
 
 
 class State:
@@ -20,5 +22,5 @@ class State:
     def draw_background(self) -> None:
         rom_data.abs_window.blit(self.background, (0, 0))
 
-    def back(self) -> None:
-        pop_state()
+    def back(self) -> State:
+        return manager.pop_state()

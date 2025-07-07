@@ -2,10 +2,11 @@ import warnings
 
 import pygame
 
-from src.data import rom_data, rw_data
-from src.core import DISPLAY_FLAG_NAMES_MAP
+from src.data.globals import rom_data, rw_data
+from src.core.constants import DISPLAY_FLAG_NAMES_MAP
 from src.core import keybinds
-import src.states
+from src.states import title, game
+from src.states import manager
 
 pygame.init()
 pygame.display.set_caption(f"bleh v{rom_data.version}")
@@ -61,9 +62,9 @@ keybinds.register(
     ("keydown", pygame.K_END),
     action=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)),
 )
-keybinds.register(("keydown", pygame.K_ESCAPE), action=src.states.manager.back)
+keybinds.register(("keydown", pygame.K_ESCAPE), action=manager.back)
 
-src.states.manager.state_dict = {"title": src.states.Title, "game": src.states.Game}
-src.states.manager.append_state("title", initial_state=True)
+manager.state_dict = {"title": title.Title, "game": game.Game}
+manager.append_state("title", initial_state=True)
 
 rom_data.running = True

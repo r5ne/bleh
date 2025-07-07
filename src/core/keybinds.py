@@ -3,24 +3,18 @@ from collections import defaultdict
 from typing import Callable, Any
 
 from src.core.types import EventTypes
-from src.core.events import (
-    is_key_down,
-    is_key_up,
-    is_key_held,
-    is_mouse_down,
-    is_mouse_up,
-    is_mouse_held,
-)
-from src.data import rom_data
+from src.core import events
+from src.data.globals import rom_data
+
 
 observers = defaultdict(list)
 input_checks = {
-    "keydown": is_key_down,
-    "keyup": is_key_up,
-    "key": is_key_held,
-    "mousebuttondown": is_mouse_down,
-    "mousebuttonup": is_mouse_up,
-    "mouse": is_mouse_held,
+    "keydown": events.is_key_down,
+    "keyup": events.is_key_up,
+    "key": events.is_key_held,
+    "mousebuttondown": events.is_mouse_down,
+    "mousebuttonup": events.is_mouse_up,
+    "mouse": events.is_mouse_held,
     "quit": lambda: rom_data.running,
 }
 sorted_bindings_cache = []
@@ -65,5 +59,5 @@ def notify() -> None:
                 used_inputs.update(inputs)
 
 
-def is_registered(*events: int, handler: Callable[[], Any]) -> bool:
-    return events in observers and handler in observers[events]
+def is_registered(*inputs: int, handler: Callable[[], Any]) -> bool:
+    return inputs in observers and handler in observers[events]
